@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 from pathlib import Path
 
-from app.routers import upload, process
+from app.routers import upload, process, translate
 from app.config import settings
 
 load_dotenv()
@@ -28,6 +28,7 @@ app.add_middleware(
 # connects the modular router to the main app
 app.include_router(upload.router)
 app.include_router(process.router)
+app.include_router(translate.router)
 
 @app.get("/health")
 def health():
