@@ -41,6 +41,33 @@ export async function detectBubbles(jobId, filename) {
     return res.json(); 
 }
 
+export async function fetchLanguages() {
+    const res = await fetch(`${BASE_URL}/api/languages`);
+
+    if (!res.ok) {
+        throw new Error('Could not load languages');
+    }
+
+    return res.json(); // { languages: [{ code, label, flag }] }
+}
+
+export async function translateBubbles(jobId, targetLanguage, bubbles) {
+    const res = await fetch(`${BASE_URL}/api/translate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            job_id: jobId,
+            target_language: targetLanguage,
+            bubbles
+        })
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Translation failed' }));
+        throw new Error(err.detail || 'Translation failed');
+    }
+    return res.json();  // { bubbles: [{...bubbles, translated_text}] }
+}
+
 // utility function to resolve relative image paths to absolute backend URL
 export function getImageURL(path) {
     return `${BASE_URL}${path}`;
