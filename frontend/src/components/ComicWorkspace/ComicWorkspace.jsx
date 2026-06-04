@@ -1,23 +1,35 @@
 import styles from './ComicWorkspace.module.css';
 import BubbleOverlay from './BubbleOverlay';
 import TranslationPanel from '../TranslationPanel/TranslationPanel';
+import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import { getImageURL } from '../../services/api';
+import { SearchIcon, TranslateIcon, DownloadIcon, CheckIcon, ErrorIcon } from '../icons/Icons';
 
 export default function ComicWorkspace({
   job,
   detection,
   bubbles,
   selectedId,
+  targetLanguage,
+  translations,
+  translatedBubbles,
   isDetecting,
+  isTranslating,
   detectError,
+  translateError,
   warning,
   onDetect,
+  onTranslate,
   onSelect,
   onUpdateText,
+  onUpdateTranslated,
   onRemove,
+  onLanguageChange
 }) {
   // derived state to check if we should render post-detection UI
   const hasDetection = bubbles.length > 0;
+  const hasTranslations = Object.keys(translations).length > 0;
+  const canTranslate = hasDetection && !!targetLanguage && !isDetecting;
 
   return (
     <div className={styles.shell}>
@@ -29,6 +41,9 @@ export default function ComicWorkspace({
             <span className={styles.dims}>{job.width} × {job.height}px</span>
             {hasDetection && (
               <span className={styles.bubbleCount}>{bubbles.length} bubbles</span>
+            )}
+            {hasTranslations && (
+              <span className={styles.translatedBadge}>✓ Translated</span>
             )}
           </div>
           <span className={styles.jobId}>Job: {job.job_id.slice(0, 8)}…</span>
@@ -52,13 +67,13 @@ export default function ComicWorkspace({
             )}
           </div>
         </div>
-          
+
         {/* toolbar pinned to bottom */}
         <div className={styles.toolbar}>
           <button
             className={`${styles.toolBtn} ${hasDetection ? styles.toolBtnDone : styles.toolBtnActive}`}
             onClick={onDetect}
-            disabled={isDetecting}
+            disabled={isDetecting || isTranslating}
           >
             {isDetecting ? (
               <>
@@ -67,32 +82,49 @@ export default function ComicWorkspace({
               </>
             ) : hasDetection ? (
               <>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                {bubbles.length} Bubbles Found — Re-detect
+                <CheckIcon />Re-detect
               </>
             ) : (
               <>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                Detect Bubbles
+                <SearchIcon />Detect Bubbles
               </>
             )}
           </button>
 
-          <button className={styles.toolBtn} disabled title="Coming in Phase 4">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="m2 5 3 3"/><path d="m18 16 2 2"/><path d="m14 19 6-6-3-3"/></svg>
-            Translate
+          <div className={styles.divider} />
+
+          {/* Language and Translate */}
+          <LanguageSelector
+            value={targetLanguage}
+            onChange={onLanguageChange}
+            disabled={!hasDetection || isDetecting || isTranslating}
+          />
+
+          <button
+            className={`${styles.toolBtn} ${canTranslate && !hasTranslations ? styles.toolBtnActive : ''}`}
+            onClick={onTranslate}
+            disabled={!canTranslate || isTranslating}
+          >
+            {isTranslating ? (
+              <><div className={styles.btnSpinner} />Translating…</>
+            ) : hasTranslations ? (
+              <><CheckIcon />Re-translate</>
+            ) : (
+              <><TranslateIcon />Translate</>
+            )}
           </button>
 
-          <button className={styles.toolBtn} disabled title="Coming in Phase 5">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download
+          <div className={styles.divider} />
+
+          <button className={styles.toolBtn} disabled title="Coming in Next Phase">
+            <DownloadIcon />Download
           </button>
         </div>
 
-        {detectError && (
+        {(detectError || translateError) && (
           <div className={styles.errorBanner}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            {detectError}
+            <ErrorIcon />
+            {detectError || translateError}
           </div>
         )}
       </div>
@@ -102,8 +134,11 @@ export default function ComicWorkspace({
         <TranslationPanel
           bubbles={bubbles}
           selectedId={selectedId}
+          translations={translations}
+          hasTranslations={hasTranslations}
           onSelect={onSelect}
           onUpdateText={onUpdateText}
+          onUpdateTranslated={onUpdateTranslated}
           onRemove={onRemove}
           warning={warning}
         />

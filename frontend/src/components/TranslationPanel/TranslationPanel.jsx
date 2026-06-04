@@ -4,17 +4,20 @@ import { BUBBLE_COLORS } from '../../shared/constants';
 export default function TranslationPanel({
     bubbles,
     selectedId,
+    translations,
     onSelect,
     onUpdateText,
+    onUpdateTranslated,
     onRemove,
     warning,
+    hasTranslations
 }) {
     if (!bubbles.length) return null;  // hide panel entirely if there are no bubbles detected yet
 
     return (
         <aside className={styles.panel}>
             <div className={styles.header}>
-                <span className={styles.title}>Detected Bubbles</span>
+                <span className={styles.title}>Speech Bubbles</span>
                 <span className={styles.count}>{bubbles.length}</span>
             </div>
             
@@ -30,6 +33,7 @@ export default function TranslationPanel({
                 {bubbles.map((bubble, i) => {
                     const color = BUBBLE_COLORS[i % BUBBLE_COLORS.length];
                     const isSelected = bubble.id === selectedId;
+                    const translated = translations[bubble.id];
 
                     return (
                         <div
@@ -59,15 +63,35 @@ export default function TranslationPanel({
                                 </button>
                             </div>
 
+                            {/* Original text */}
+                            <div className={styles.fieldLabel}>Original</div>
                             <textarea
                                 className={styles.textArea}
                                 value={bubble.text}
                                 onChange={(e) => onUpdateText(bubble.id, e.target.value)}
-                                onClick={(e) => e.stopPropagation()}  // prevents card toggle when clicking text
-                                rows={3}
-                                placeholder="Extracted text…"
+                                onClick={(e) => e.stopPropagation()}
+                                rows={2}
+                                placeholder="Extracted text..."
                             />
 
+                            {/* Translated Text should show only after translation */}
+                            {hasTranslations && (
+                                <>
+                                <div className={styles.fieldLabel} style={{ color }}>
+                                    Translated
+                                </div>
+                                <textarea
+                                    className={`${styles.textArea} ${styles.translatedArea}`}
+                                    style={{ borderColor: `${color}40` }}
+                                    value={translated || ''}
+                                    onChange={(e) => onUpdateTranslated(bubble.id, e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    rows={2}
+                                    placeholder={translated === undefined ? 'Pending…' : ''}
+                                />
+                                </>
+                            )}
+                            
                             <div className={styles.coords}>
                                 {bubble.x},{bubble.y} · {bubble.width}×{bubble.height}px
                             </div>

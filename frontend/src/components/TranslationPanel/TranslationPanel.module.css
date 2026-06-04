@@ -142,3 +142,19 @@
   font-family: var(--font-mono);
   color: var(--text-muted);
 }
+
+.fieldLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  margin-top: 8px;
+}
+
+.fieldLabel:first-of-type { margin-top: 0; }
+
+.translatedArea {
+  background: rgba(245, 166, 35, 0.04);
+}

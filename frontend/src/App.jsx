@@ -1,30 +1,11 @@
 import './styles/globals.css';
 import UploadZone from './components/UploadZone/UploadZone';
 import ComicWorkspace from './components/ComicWorkspace/ComicWorkspace';
-import { useComicProcessor } from './services/hooks/useComicProcessor';
+import { useComicProcessor } from './hooks/useComicProcessor';
 import styles from './App.module.css';
 
 export default function App() {
-  const processor = useComicProcessor();
-
-  // clean destructuring of all state and actions
-  const {
-    job,
-    detection,
-    bubbles,
-    selectedId,
-    isUploading,
-    isDetecting,
-    uploadError,
-    detectError,
-    handleUpload,
-    handleDetect,
-    updateBubbleText,
-    removeBubble,
-    setSelectedId,
-    reset,
-    warning
-  } = processor
+  const p = useComicProcessor();
 
   return (
     <div className={styles.layout}>
@@ -34,17 +15,13 @@ export default function App() {
           <span className={styles.logoText}>ComicLingo</span>
         </div>
         <nav className={styles.nav}>
-          {job && (
-            <button className={styles.resetBtn} onClick={reset}>
-              ← New Upload
-            </button>
-          )}
-          <span className={styles.badge}>Prototype</span>
+          {p.job && <button className={styles.resetBtn} onClick={p.reset}>← New Upload</button>}
+          <span className={styles.badge}>Prototype v0.1</span>
         </nav>
       </header>
 
       <main className={styles.main}>
-        {!job ? (
+        {!p.job ? (
           <div className={styles.uploadView}>
             <div className={styles.heroText}>
               <h1 className={styles.title}>Translate comics<br />into any language.</h1>
@@ -53,29 +30,37 @@ export default function App() {
                 translates it — then redraws it back into the original bubbles.
               </p>
             </div>
-            {isUploading ? (
+            {p.isUploading ? (
               <div className={styles.uploading}>
                 <div className={styles.spinner} />
                 <p>Uploading…</p>
               </div>
             ) : (
-              <UploadZone onUpload={handleUpload} />
+              <UploadZone onUpload={p.handleUpload} />
             )}
-            {uploadError && <p className={styles.uploadError}>{uploadError}</p>}
+            {p.uploadError && <p className={styles.uploadError}>{p.uploadError}</p>}
           </div>
         ) : (
           <ComicWorkspace
-            job={job}
-            detection={detection}
-            bubbles={bubbles}
-            selectedId={selectedId}
-            isDetecting={isDetecting}
-            detectError={detectError}
-            warning={warning}
-            onDetect={handleDetect}
-            onSelect={setSelectedId}
-            onUpdateText={updateBubbleText}
-            onRemove={removeBubble}
+            job={p.job}
+            detection={p.detection}
+            bubbles={p.bubbles}
+            selectedId={p.selectedId}
+            targetLanguage={p.targetLanguage}
+            translations={p.translations}
+            translatedBubbles={p.translatedBubbles}
+            isDetecting={p.isDetecting}
+            isTranslating={p.isTranslating}
+            detectError={p.detectError}
+            translateError={p.translateError}
+            warning={p.warning}
+            onDetect={p.handleDetect}
+            onTranslate={p.handleTranslate}
+            onSelect={p.setSelectedId}
+            onUpdateText={p.updateBubbleText}
+            onUpdateTranslated={p.updateTranslatedText}
+            onRemove={p.removeBubble}
+            onLanguageChange={p.setTargetLanguage}
           />
         )}
       </main>
