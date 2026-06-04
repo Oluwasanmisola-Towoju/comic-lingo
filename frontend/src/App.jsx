@@ -1,7 +1,7 @@
 import './styles/globals.css';
 import UploadZone from './components/UploadZone/UploadZone';
 import ComicWorkspace from './components/ComicWorkspace/ComicWorkspace';
-import { useComicProcessor } from './hooks/useComicProcessor';
+import { useComicProcessor } from './services/hooks/useComicProcessor';
 import styles from './App.module.css';
 
 export default function App() {
