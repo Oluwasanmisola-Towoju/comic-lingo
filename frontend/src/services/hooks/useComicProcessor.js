@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { uploadComic, detectBubbles, translateBubbles } from '../api'
+import { uploadComic, detectBubbles, translateBubbles, renderComic } from '../api'
 
 export function useComicProcessor() {
     const [job, setJob] = useState(null);
@@ -12,12 +12,18 @@ export function useComicProcessor() {
     const [translations, setTranslations] = useState({});
     const [translatedBubbles, setTranslatedBubbles] = useState([]);
 
+    const [renderResult, setRenderResult] = useState(null); // { output_url, original_url }
+    const [showResult, setShowResult] = useState(false) // controls ResultViewer
+
     const [isUploading, setIsUploading] = useState(false);
     const [isDetecting, setIsDetecting] = useState(false);
     const [isTranslating, setIsTranslating] = useState(false);
+    const [isRendering, setIsRendering] = useState(false);
+
     const [uploadError, setUploadError] = useState('');
     const [detectError, setDetectError] = useState('');
     const [translateError, setTranslateError] = useState('');
+    const [renderError, setRenderError] = useState('');
     const [warning, setWarning] = useState('');
 
     const handleUpload = useCallback(async (file) => {
@@ -25,6 +31,9 @@ export function useComicProcessor() {
         setUploadError('');  // reset previous detection state on new upload
         setDetection(null);
         setBubbles([]);
+        setTranslations({});
+        setTranslatedBubbles([]);
+        setRenderResult(null);
         setSelectedId(null);
 
         try {
@@ -49,6 +58,7 @@ export function useComicProcessor() {
         setWarning('');
         setTranslations({});
         setTranslatedBubbles([]);
+        setRenderResult(null);
         setSelectedId(null);
 
         try {
@@ -73,6 +83,7 @@ export function useComicProcessor() {
         if (!job || !bubbles.length || !targetLanguage) return;
         setIsTranslating(true);
         setTranslateError('');
+        setRenderResult(null);
 
         try {
             const result = await translateBubbles(job.job_id, targetLanguage, bubbles);
@@ -92,6 +103,24 @@ export function useComicProcessor() {
             setIsTranslating(false);
         }
     }, [job, bubbles, targetLanguage]);
+
+    const handleRender = useCallback(async () => {
+        if (!job || !translatedBubbles.length) return;
+        setIsRendering(true);
+        setRenderError('');
+
+        try {
+            const result = await renderComic(job.job_id, targetLanguage, translatedBubbles);
+            setRenderResult(result);
+            setShowResult(true);
+        }
+        catch (err) {
+            setRenderError(err.message);
+        } 
+        finally {
+            setIsRendering(false);
+        }
+    }, [job, targetLanguage, translatedBubbles]);
 
     // function for user to tweak the detected boxes
     const updateBubbleText = useCallback((id, newText) => {
@@ -119,6 +148,8 @@ export function useComicProcessor() {
         setBubbles([]);
         setTranslations({});
         setTranslatedBubbles([]);
+        setRenderResult(null);
+        setShowResult(false);
         setSelectedId(null);
         setTargetLanguage('');
         setUploadError('');
@@ -136,23 +167,28 @@ export function useComicProcessor() {
         targetLanguage,
         translations,
         translatedBubbles,
+        renderResult,
+        showResult,
         isUploading,
         isDetecting,
         isTranslating,
         uploadError,
         detectError,
         translateError,
+        renderError,
         warning,
 
         // Actions
         handleUpload,
         handleDetect,
         handleTranslate,
+        handleRender,
         updateBubbleText,
         updateTranslatedText,
         removeBubble,
         setSelectedId,
         setTargetLanguage,
+        setShowResult,
         reset
     };
 }

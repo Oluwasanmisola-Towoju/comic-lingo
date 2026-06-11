@@ -68,6 +68,25 @@ export async function translateBubbles(jobId, targetLanguage, bubbles) {
     return res.json();  // { bubbles: [{...bubbles, translated_text}] }
 }
 
+export async function renderComic(jobId, targetLanguage, bubbles) {
+    const res = await fetch(`${BASE_URL}/api/render`, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            job_id: jobId,
+            target_language: targetLanguage,
+            bubbles
+        })
+    });
+    
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Render failed" }));
+        throw new Error(err.detail || 'Render failed');
+    }
+
+    return res.json(); // { output_url, original_url, bubble_count, skipped_count }
+}
+
 // utility function to resolve relative image paths to absolute backend URL
 export function getImageURL(path) {
     return `${BASE_URL}${path}`;
