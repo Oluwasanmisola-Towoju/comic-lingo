@@ -62,3 +62,17 @@ export const ArrowsIcon = () => (
     <polyline points="9 18 15 12 9 6" />
   </svg>
 );
+
+export const PaintIcon = () => (
+  <svg {...iconStyle}>
+    <path d="M2 13.5V20h6.5l9.86-9.86-6.5-6.5L2 13.5z" />
+    <path d="m18.5 2.5 3 3" />
+  </svg>
+);
+
+export const EyeIcon = () => (
+  <svg {...iconStyle}>
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);

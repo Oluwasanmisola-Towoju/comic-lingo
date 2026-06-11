@@ -3,7 +3,7 @@ import BubbleOverlay from './BubbleOverlay';
 import TranslationPanel from '../TranslationPanel/TranslationPanel';
 import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import { getImageURL } from '../../services/api';
-import { SearchIcon, TranslateIcon, DownloadIcon, CheckIcon, ErrorIcon } from '../icons/Icons';
+import { SearchIcon, TranslateIcon, DownloadIcon, CheckIcon, ErrorIcon, PaintIcon, EyeIcon } from '../icons/Icons';
 
 export default function ComicWorkspace({
   job,
@@ -48,9 +48,9 @@ export default function ComicWorkspace({
           <div className={styles.fileInfo}>
             <span className={styles.filename}>{job.filename}</span>
             <span className={styles.dims}>{job.width} × {job.height}px</span>
-            {hasDetection    && <span className={styles.pill}>{bubbles.length} bubbles</span>}
+            {hasDetection && <span className={styles.pill}>{bubbles.length} bubbles</span>}
             {hasTranslations && <span className={styles.pillGreen}>✓ Translated</span>}
-            {hasRender       && <span className={styles.pillAccent}>✓ Rendered</span>}
+            {hasRender && <span className={styles.pillAccent}>✓ Rendered</span>}
           </div>
           <span className={styles.jobId}>Job: {job.job_id.slice(0, 8)}…</span>
         </div>
@@ -156,13 +156,6 @@ export default function ComicWorkspace({
   );
 }
 
-// Shared icon components 
-const sv = { width:15, height:15, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:2, strokeLinecap:"round" };
-const SearchIcon    = () => <svg {...sv}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>;
-const TranslateIcon = () => <svg {...sv}><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="m2 5 3 3"/><path d="m18 16 2 2"/><path d="m14 19 6-6-3-3"/></svg>;
-const PaintIcon     = () => <svg {...sv}><path d="M2 13.5V20h6.5l9.86-9.86-6.5-6.5L2 13.5z"/><path d="m18.5 2.5 3 3"/></svg>;
-const CheckIcon     = () => <svg {...sv}><polyline points="20 6 9 17 4 12"/></svg>;
-const EyeIcon       = () => <svg {...sv}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
-const ErrorIcon     = () => <svg {...sv}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>;
-const Divider       = () => <div style={{ width:1, height:24, background:'var(--border)', flexShrink:0 }} />;
-const Spinner       = () => <div style={{ width:13, height:13, border:'1.5px solid rgba(255,255,255,0.25)', borderTopColor:'currentColor', borderRadius:'50%', animation:'spin 0.7s linear infinite' }} />;
+// Utility components
+const Divider = () => <div style={{ width: 1, height: 24, background: 'var(--border)', flexShrink: 0 }} />;
+const Spinner = () => <div style={{ width: 13, height: 13, border: '1.5px solid rgba(255,255,255,0.25)', borderTopColor: 'currentColor', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />;
