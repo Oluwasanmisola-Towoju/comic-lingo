@@ -2,6 +2,7 @@ import styles from './ComicWorkspace.module.css';
 import BubbleOverlay from './BubbleOverlay';
 import TranslationPanel from '../TranslationPanel/TranslationPanel';
 import LanguageSelector from '../LanguageSelector/LanguageSelector';
+import ResultViewer from '../ResultViewer/ResultViewer';
 import { getImageURL } from '../../services/api';
 import { SearchIcon, TranslateIcon, DownloadIcon, CheckIcon, ErrorIcon, PaintIcon, EyeIcon } from '../icons/Icons';
 
@@ -58,7 +59,7 @@ export default function ComicWorkspace({
         <div className={styles.canvasArea}>
           <div className={styles.imageWrap}>
             <img
-              src={getImageUrl(job.image_url)}
+              src={getImageURL(job.image_url)}
               alt="Uploaded comic page"
               className={styles.comicImage}
             />

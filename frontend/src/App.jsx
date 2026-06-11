@@ -2,6 +2,7 @@ import './styles/globals.css';
 import UploadZone from './components/UploadZone/UploadZone';
 import ComicWorkspace from './components/ComicWorkspace/ComicWorkspace';
 import { useComicProcessor } from './services/hooks/useComicProcessor';
+import ResultViewer from './components/ResultViewer/ResultViewer';
 import styles from './App.module.css';
 
 export default function App() {

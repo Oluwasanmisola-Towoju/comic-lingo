@@ -51,7 +51,7 @@ async def render(req: RenderRequest):
     for ext in [".jpg", ".jpeg", ".png", ".webp"]:
         candidate = Path(settings.upload_dir) / f"{req.job_id}{ext}"
         if candidate.exists():
-            uplaod_path = candidate
+            upload_path = candidate
             break
     
     if not upload_path:
@@ -96,8 +96,8 @@ async def render(req: RenderRequest):
 
     return RenderResponse(
         job_id=req.job_id,
-        output_url=f"/api/image/{output_filename}",
-        original_url=f"/api/image/{upload_path.name}",
+        output_url=f"/api/images/{output_filename}",
+        original_url=f"/api/images/{upload_path.name}",
         bubble_count=len(valid_bubbles),
         skipped_count=skipped_count,
     )
