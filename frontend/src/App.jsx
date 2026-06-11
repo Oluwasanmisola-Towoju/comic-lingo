@@ -27,7 +27,7 @@ export default function App() {
               <h1 className={styles.title}>Translate comics<br />into any language.</h1>
               <p className={styles.subtitle}>
                 Upload a comic page. AI detects the speech bubbles, extracts the text,
-                translates it — then redraws it back into the original bubbles.
+                translates it and then redraws it back into the original bubbles.
               </p>
             </div>
             {p.isUploading ? (
@@ -49,21 +49,35 @@ export default function App() {
             targetLanguage={p.targetLanguage}
             translations={p.translations}
             translatedBubbles={p.translatedBubbles}
+            renderResult={p.renderResult}
             isDetecting={p.isDetecting}
             isTranslating={p.isTranslating}
+            isRendering={p.isRendering}
             detectError={p.detectError}
             translateError={p.translateError}
+            renderError={p.renderError}
             warning={p.warning}
             onDetect={p.handleDetect}
             onTranslate={p.handleTranslate}
+            onRender={p.handleRender}
             onSelect={p.setSelectedId}
             onUpdateText={p.updateBubbleText}
             onUpdateTranslated={p.updateTranslatedText}
             onRemove={p.removeBubble}
             onLanguageChange={p.setTargetLanguage}
+            onShowResult={() => p.setShowResult(true)}
           />
         )}
       </main>
+
+      {p.showResult && p.renderResult && (
+        <ResultViewer
+          originalUrl={p.renderResult.original_url}
+          outputUrl={p.renderResult.output_url}
+          onClose={() => p.setShowResult(false)}
+        />
+      )}
+
     </div>
   );
 }

@@ -174,3 +174,23 @@
   border-radius: 99px;
   white-space: nowrap;
 }
+.downloadBtn {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.downloadBtn:hover {
+  background: rgba(245, 166, 35, 0.25) !important;
+}
+
+.pillAccent {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 2px 8px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
