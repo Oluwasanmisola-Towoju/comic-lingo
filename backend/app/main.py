@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 from pathlib import Path
 
-from app.routers import upload, process, translate
+from app.routers import upload, process, translate, render
 from app.config import settings
 
 load_dotenv()
@@ -29,6 +29,9 @@ app.add_middleware(
 app.include_router(upload.router)
 app.include_router(process.router)
 app.include_router(translate.router)
+app.include_router(render.router)
+
+app.mount("/api/outputs", StaticFiles(directory=settings.output_dir), name="outputs")
 
 @app.get("/health")
 def health():
