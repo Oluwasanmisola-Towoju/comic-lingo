@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ComicLingo</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="popup">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-mark">◈</span>
+                <span class="logo-text">ComicLingo</span>
+            </div>
+            <span class="version-pill">v1.0</span>
+        </header>
+
+        <!-- Toggle -->
+        <section class="card">
+            <div class="toggle-row">
+                <div>
+                    <div class="field-label" id="enabled-label">Extension disabled </div>
+                    <div class="field-sub">Click Images to translate bubbles </div>
+                </div>
+                <label class="toggle" aria-label="Enable ComicLingo">
+                    <input type="checkbox" id="enabled-toggle">
+                    <span class="track"><span class="thumb"></span></span>
+                </label>
+            </div>
+        </section>
+
+        <!-- Language Selector -->
+        <section class="card">
+            <div class="field-label">Translate into</div>
+            <div class="select-wrap">
+                <select id="lang-select"></select>
+                <span class="select-caret">▾</span>
+            </div>
+        </section>
+
+        <!-- Status -->
+        <div class="status-row" id="status-row">
+            <span class="dot" id="status-dot"></span>
+            <span class="status-text" id="status-text">Checking...</span>
+        </div>
+
+        <!-- Advanced -->
+        <details class="advanced" id="advanced-details">
+            <summary class="adv-summary">
+                Advanced
+                <span class="adv-caret">▾</span>
+            </summary>
+            <div class="adv-body">
+                <div class="field-label">API Endpoint</div>
+                <div class="input-row">
+                    <input type="text" id="endpoint-input" class="text-input"
+                        placeholder="http://localhost:8000" spellcheck="false">
+                    <button class="save-btn" id="save-endpoint">Save</button>
+                </div>
+                <div class="save-feedback" id="save-feedback"></div>
+            </div>
+        </details>
+
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
