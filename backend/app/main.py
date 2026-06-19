@@ -19,8 +19,7 @@ app = FastAPI(title="ComicLingo API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins.split(","),
-    allow_origin_regex=r"chrome-extension://.*|moz-extension://.*",
+    allow_origins=["*"],  # Allow all origins during development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

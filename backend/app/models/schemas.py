@@ -30,3 +30,7 @@ class DetectResponse(BaseModel):
 class ErrorResponse(BaseModel):
     error: str
     detail: Optional[str] = None
+    
+class UploadURLRequest(BaseModel):
+    image_url: str
+    referrer: str = None

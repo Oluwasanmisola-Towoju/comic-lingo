@@ -17,6 +17,7 @@ const SHADOW_STYLES = `
     width: 100%;
     height: 100%;
     overflow: visible;
+    pointer-events: auto;
   }
 
   /* Translate badge — shown on first hover */
@@ -36,7 +37,7 @@ const SHADOW_STYLES = `
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    pointer-events: all;
+    pointer-events: all !important;
     backdrop-filter: blur(4px);
     transition: background 0.15s, transform 0.15s;
     white-space: nowrap;
@@ -194,12 +195,18 @@ let settings = {
   apiEndpoint: 'http://localhost:8000',
 };
 
+let settingsLoaded = false;
+
 chrome.storage.sync.get(
   ['enabled', 'targetLanguage', 'apiEndpoint'],
   (stored) => {
-    settings.enabled = stored.enabled ?? false;
+    settings.enabled = stored.enabled ?? true; // Default to enabled
     settings.targetLanguage = stored.targetLanguage ?? 'nigerian_pidgin';
     settings.apiEndpoint = stored.apiEndpoint ?? 'http://localhost:8000';
+    settingsLoaded = true;
+
+    // Scan images after settings are loaded
+    scanImages();
   }
 );
 
@@ -338,14 +345,23 @@ function showBadge(img) {
   state.host = host;
   state.shadow = shadow;
   state.processing = false;
+  state.clickHandler = () => processImage(img, state); // Store direct reference
 
   document.body.appendChild(host);
   positionHost(host, img);
 
+  // Add hover listeners to the host so badge stays visible when hovering over it
+  host.addEventListener('mouseenter', () => {
+    host.style.display = 'block';
+  });
+  host.addEventListener('mouseleave', () => {
+    host.style.display = 'none';
+  });
+
   // Handle badge click to start processing
   const badgeEl = shadow.getElementById('badge');
   if (badgeEl) {
-    badgeEl.addEventListener('click', handleBadgeClick);
+    badgeEl.addEventListener('click', state.clickHandler);
   }
 }
 
@@ -385,43 +401,29 @@ async function processImage(img, state) {
   try {
     if (controller.signal.aborted) throw new Error('Processing cancelled.');
 
-    // Fetch image
-    let blob;
-    try {
-      const res = await fetch(img.src, { mode: 'cors', signal: controller.signal });
-      if (!res.ok) throw new Error('Failed to load image.');
-      blob = await res.blob();
-    } catch (err) {
-      if (err.name === 'AbortError') throw new Error('Processing timed out.');
-      throw new Error('Unable to access image. It may be CORS-restricted.');
-    }
-
-    if (controller.signal.aborted) throw new Error('Processing cancelled.');
-
-    // Upload 
-    const formData = new FormData();
-    const urlWithoutQuery = img.src.split('?')[0];
-    const ext = (urlWithoutQuery.split('.').pop() || 'jpg').toLowerCase();
-    const validExts = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
-
-    if (!validExts[ext] && !blob.type) {
-      throw new Error('Invalid image format.');
-    }
-
-    const mime = validExts[ext] || blob.type || 'image/jpeg';
-    formData.append('file', new File([blob], `comic.${ext}`, { type: mime }));
-
-    const uploadRes = await fetch(`${settings.apiEndpoint}/api/upload`, {
-      method: 'POST', body: formData, signal: controller.signal,
+    // Send image URL to backend - backend downloads it in order to avoid CORS
+    // This is more reliable than trying to extract CORS-restricted images on client
+    const uploadUrlRes = await fetch(`${settings.apiEndpoint}/api/upload-url`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image_url: img.src,
+        referrer: window.location.href
+      }),
+      signal: controller.signal,
     });
-    if (!uploadRes.ok) throw new Error('Upload to server failed.');
+
+    if (!uploadUrlRes.ok) {
+      const errorData = await uploadUrlRes.json().catch(() => ({}));
+      throw new Error(errorData.detail || 'Failed to download image from URL.');
+    }
 
     let uploadData;
     try {
-      uploadData = await uploadRes.json();
+      uploadData = await uploadUrlRes.json();
       if (!uploadData.job_id || !uploadData.filename) throw new Error('Invalid response.');
     } catch (err) {
-      throw new Error('Upload response invalid.');
+      throw new Error('Server response invalid.');
     }
 
     if (controller.signal.aborted) throw new Error('Processing cancelled.');
@@ -497,21 +499,10 @@ async function processImage(img, state) {
           b.className = 'badge';
           b.textContent = '';
           b.innerHTML = `<span class="badge-logo">◈</span><span id="badge-label">Retry</span>`;
-          b.removeEventListener('click', handleBadgeClick);
-          b.addEventListener('click', handleBadgeClick);
+          b.removeEventListener('click', state.clickHandler);
+          b.addEventListener('click', state.clickHandler);
         }
       }, 4000);
-    }
-  }
-}
-
-function handleBadgeClick(event) {
-  // Find the overlay state by traversing up to the host element
-  const host = event.currentTarget.getRootNode().host;
-  for (const [img, state] of activeOverlays.entries()) {
-    if (state.host === host) {
-      processImage(img, state);
-      break;
     }
   }
 }
@@ -653,7 +644,7 @@ function positionHost(host, img) {
     left: ${r.left + window.scrollX}px;
     width: ${r.width}px;
     height: ${r.height}px;
-    pointer-events: none;
+    pointer-events: auto;
     z-index: 2147483647;
     display: block;
   `;
@@ -711,6 +702,12 @@ imageObserver.observe(document.body, { childList: true, subtree: true });
 // Observe DOM for new images (infinite scroll, SPAs) 
 
 function scanImages() {
+  if (!settingsLoaded) {
+    // Wait a bit and retry if settings not loaded yet
+    setTimeout(scanImages, 100);
+    return;
+  }
+
   document.querySelectorAll('img').forEach((img) => {
     if (img.complete && img.naturalWidth > 0) {
       attach(img);
@@ -720,7 +717,10 @@ function scanImages() {
   });
 }
 
-scanImages();
-
-const observer = new MutationObserver(() => scanImages());
+// Don't scan immediately, wait for settings to load (done in chrome.storage callback)
+const observer = new MutationObserver(() => {
+  if (settingsLoaded) {
+    scanImages();
+  }
+});
 observer.observe(document.body, { childList: true, subtree: true });
