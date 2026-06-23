@@ -17,7 +17,7 @@ export default function App() {
         </div>
         <nav className={styles.nav}>
           {p.job && <button className={styles.resetBtn} onClick={p.reset}>← New Upload</button>}
-          <span className={styles.badge}>Prototype</span>
+          <span className={styles.badge}>Live</span>
         </nav>
       </header>
 
